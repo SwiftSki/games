@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flappy bird without Graphics!</title>
+    <script src="../p5.min.js"></script>
+  </head>
+  <body>
+    <script>
+      var player, score = 0, pipe = [200, 100], pipeX = [400, 600];
+      class bird {
+        constructor(){
+          this.y = 0;
+          this.yVel = 0;
+          this.alive = true;
+        }
+      }
+      function keyPressed(){
+        if(keyCode == 32){
+          player.yVel += 5;
+        }
+        //return false;
+      }
+      function setup() {
+        createCanvas(400, 400);
+        noStroke();
+        player = new bird();
+      }
+
+      function draw() {
+        background(150, 200, 255);
+
+        //floor and ceiling
+        fill(50, 255, 100);
+        rect(0, 390, 400, 10);
+        rect(0, 0, 400, 10);
+
+        //draw pipe
+        fill(0, 255, 0);
+        for(let i = 0; i < pipe.length; i++){
+          rect(pipeX[i], 0, 30, pipe[i] - 25); //top
+          rect(pipeX[i], pipe[i] + 25, 30, 400); //bottom
+        }
+
+        //score
+        textSize(20);
+        fill(0);
+        text(score, 20, 30);
+
+        //draw player
+        fill(255, 255, 0);
+        circle(100, player.y, 10);
+
+        //move player
+        player.y -= player.yVel;
+        player.yVel -= 0.2;
+
+        //collisions
+        if(player.y > 385){ //floor
+          player.y = 385;
+          player.yVel = 0;
+        }
+        if(player.y < 15){ //ceiling
+          player.y = 15;
+          player.yVel = 0;
+        }
+        if(pipeX[0] == 70){
+          score++;
+        }
+        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y >= pipe[0] + 25){
+          player.alive = false;
+        } //bottom pipe
+        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y <= pipe[0] - 25){
+          player.alive = false;
+        } //top pipe
+
+        //pipes
+        if(pipeX[0] < 0){
+          pipe.push(Math.floor(random() * 300) + 50);
+          pipeX.push(400);
+          pipe.shift();
+          pipeX.shift();
+        }
+        if(player.alive){
+          for(let i = 0; i < pipeX.length; i++){
+            pipeX[i] --;
+          }
+        } else {
+          score = 'you died';
+        }
+        //console.log(player.y);
+      }
+    </script>
+  </body>
+</html>
