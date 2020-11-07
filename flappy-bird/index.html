@@ -16,7 +16,12 @@
       }
       function keyPressed(){
         if(keyCode == 32){
-          player.yVel += 5;
+          if(player.alive) player.yVel += 5;
+          else {
+            score = 0;
+            pipe = [200, 100];
+            pipeX = [400, 600];
+          }
         }
         //return false;
       }
