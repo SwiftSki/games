@@ -6,58 +6,74 @@
   </head>
   <body>
     <script>
-      var player, score = 0, pipe = [200, 100], pipeX = [400, 600];
-      class bird {
-        constructor(){
+      var player, //set vars that will change
+          pipe = [200, 100], 
+          pipeX = [400, 600];
+      const PIPE_SPACE = 50, //set vars that won't change
+            PLAYER_DIAMETER = 10;
+      class bird { //this creates the player
+        constructor(oldScore){
           this.y = 0;
           this.yVel = 0;
+          this.score = 0;
           this.alive = true;
+          oldScore != undefined ? this.highScore = oldScore : this.highScore = 0;
         }
       }
+
       function keyPressed(){
-        if(keyCode == 32){
-          if(player.alive) player.yVel += 5;
-          else {
-            score = 0;
-            pipe = [200, 100];
-            pipeX = [400, 600];
-          }
+        if(keyCode == 32){ //checks if spacebar is pressed
+          player.yVel += 5;
         }
-        //return false;
+        if(!player.alive){
+          player = new bird(player.highScore);
+          pipe = [200, 100];
+          pipeX = [400, 600];
+        }
       }
+      function mouseClicked(){
+        player.yVel += 5;
+        if(!player.alive){
+          player = new bird();
+          pipe = [200, 100];
+          pipeX = [400, 600];
+        }
+      }
+
       function setup() {
-        createCanvas(400, 400);
-        noStroke();
-        player = new bird();
+        createCanvas(400, 400); //creates the canvas for drawing
+        noStroke(); //sstyling
+        player = new bird(); //creates the player
       }
 
       function draw() {
         background(150, 200, 255);
 
-        //floor and ceiling
+        //draw floor and ceiling
         fill(50, 255, 100);
         rect(0, 390, 400, 10);
         rect(0, 0, 400, 10);
 
-        //draw pipe
+        //draw pipes
         fill(0, 255, 0);
         for(let i = 0; i < pipe.length; i++){
-          rect(pipeX[i], 0, 30, pipe[i] - 25); //top
-          rect(pipeX[i], pipe[i] + 25, 30, 400); //bottom
+          rect(pipeX[i], 0, 30, pipe[i] - PIPE_SPACE / 2); //top
+          rect(pipeX[i], pipe[i] + PIPE_SPACE / 2, 30, 400); //bottom
         }
 
         //score
         textSize(20);
         fill(0);
-        text(score, 20, 30);
+        text(player.score, 20, 30);
+        if(!player.alive) text('you died\nhigh score: ' + player.highScore, 20, 60); //checks if the player id dead
 
         //draw player
         fill(255, 255, 0);
-        circle(100, player.y, 10);
+        circle(100, player.y, PLAYER_DIAMETER);
 
         //move player
         player.y -= player.yVel;
-        player.yVel -= 0.2;
+        player.yVel -= 0.2; //gravity
 
         //collisions
         if(player.y > 385){ //floor
@@ -68,31 +84,32 @@
           player.y = 15;
           player.yVel = 0;
         }
-        if(pipeX[0] == 70){
-          score++;
+        if(pipeX[0] == 70){ //change score
+          player.score++;
         }
-        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y >= pipe[0] + 25){
+
+        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y >= pipe[0] + PIPE_SPACE / 2){
           player.alive = false;
         } //bottom pipe
-        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y <= pipe[0] - 25){
+
+        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y <= pipe[0] - PIPE_SPACE / 2){
           player.alive = false;
         } //top pipe
 
-        //pipes
+        //check if pipes need to be respawned
         if(pipeX[0] < 0){
-          pipe.push(Math.floor(random() * 300) + 50);
+          pipe.push(Math.floor(random() * 300) + 50); //set new pipe position
           pipeX.push(400);
-          pipe.shift();
+          pipe.shift(); //remove old pipe
           pipeX.shift();
         }
         if(player.alive){
-          for(let i = 0; i < pipeX.length; i++){
-            pipeX[i] --;
+          for(let i = 0; i < pipeX.length; i++){ 
+            pipeX[i] --; //move pipes closer
           }
-        } else {
-          score = 'you died';
+        } else { //change highscore if necessary
+          if(player.score > player.highScore) player.highScore = player.score;
         }
-        //console.log(player.y);
       }
     </script>
   </body>
