@@ -6,111 +6,136 @@
   </head>
   <body>
     <script>
-      var player, //set vars that will change
-          pipe = [200, 100], 
-          pipeX = [400, 600];
-      const PIPE_SPACE = 50, //set vars that won't change
-            PLAYER_DIAMETER = 10;
-      class bird { //this creates the player
-        constructor(oldScore){
-          this.y = 0;
-          this.yVel = 0;
-          this.score = 0;
-          this.alive = true;
-          oldScore != undefined ? this.highScore = oldScore : this.highScore = 0;
-        }
-      }
+var player, //set vars that will change
+    BIRD,
+    TOP_PIPE,
+    BOTTOM_PIPE,
+    pipe = [200, 100], 
+    pipeX = [400, 600];
+const PIPE_SPACE = 70, //set vars that won't change
+      PLAYER_DIAMETER = 10,
+      PIPE_WIDTH = 50;
+      
+class bird { //this creates the player
+  constructor(oldScore){
+    this.y = 0;
+    this.yVel = 0;
+    this.score = 0;
+    this.alive = true;
+    oldScore != undefined ? this.highScore = oldScore : this.highScore = window.localStorage.getItem('highScore');
+  }
+}
 
-      function keyPressed(){
-        if(keyCode == 32){ //checks if spacebar is pressed
-          player.yVel += 5;
-        }
-        if(!player.alive){
-          player = new bird(player.highScore);
-          pipe = [200, 100];
-          pipeX = [400, 600];
-        }
-      }
-      function mouseClicked(){
-        player.yVel += 5;
-        if(!player.alive){
-          player = new bird();
-          pipe = [200, 100];
-          pipeX = [400, 600];
-        }
-      }
+function keyPressed(){
+  if(keyCode == 32){ //checks if spacebar is pressed
+    player.yVel += 5;
+  }
+  if(!player.alive){
+    player = new bird(player.highScore);
+    pipe = [200, 100];
+    pipeX = [400, 600];
+  }
+}
+function mouseClicked(){
+  player.yVel += 5;
+  if(!player.alive){
+    player = new bird();
+    pipe = [200, 100];
+    pipeX = [400, 600];
+  }
+}
 
-      function setup() {
-        createCanvas(400, 400); //creates the canvas for drawing
-        noStroke(); //sstyling
-        player = new bird(); //creates the player
-      }
+function setup() {
+  createCanvas(400, 400); //creates the canvas for drawing
+  noStroke(); //styling
+  
+  if(window.localStorage.getItem('highScore') == undefined) window.localStorage.setItem('highScore', 0);
+  
+  PIPE = loadImage('https://swiftski.github.io/games/flappy-bird/pipe.png');
+  PIPE_HEAD = loadImage('https://swiftski.github.io/games/flappy-bird/pipe-head.png');
+  BIRD = loadImage('https://swiftski.github.io/games/flappy-bird/bird.png');
+  
+  player = new bird(); //creates the player
+}
 
-      function draw() {
-        background(150, 200, 255);
-
-        //draw floor and ceiling
-        fill(50, 255, 100);
-        rect(0, 390, 400, 10);
-        rect(0, 0, 400, 10);
-
-        //draw pipes
-        fill(0, 255, 0);
-        for(let i = 0; i < pipe.length; i++){
-          rect(pipeX[i], 0, 30, pipe[i] - PIPE_SPACE / 2); //top
-          rect(pipeX[i], pipe[i] + PIPE_SPACE / 2, 30, 400); //bottom
-        }
-
-        //score
-        textSize(20);
-        fill(0);
-        text(player.score, 20, 30);
-        if(!player.alive) text('you died\nhigh score: ' + player.highScore, 20, 60); //checks if the player id dead
-
-        //draw player
-        fill(255, 255, 0);
-        circle(100, player.y, PLAYER_DIAMETER);
-
-        //move player
-        player.y -= player.yVel;
-        player.yVel -= 0.2; //gravity
-
-        //collisions
-        if(player.y > 385){ //floor
-          player.y = 385;
-          player.yVel = 0;
-        }
-        if(player.y < 15){ //ceiling
-          player.y = 15;
-          player.yVel = 0;
-        }
-        if(pipeX[0] == 70){ //change score
-          player.score++;
-        }
-
-        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y >= pipe[0] + PIPE_SPACE / 2){
-          player.alive = false;
-        } //bottom pipe
-
-        if(pipeX[0] >= 70 && pipeX[0] <= 100 && player.y <= pipe[0] - PIPE_SPACE / 2){
-          player.alive = false;
-        } //top pipe
-
-        //check if pipes need to be respawned
-        if(pipeX[0] < 0){
-          pipe.push(Math.floor(random() * 300) + 50); //set new pipe position
-          pipeX.push(400);
-          pipe.shift(); //remove old pipe
-          pipeX.shift();
-        }
-        if(player.alive){
-          for(let i = 0; i < pipeX.length; i++){ 
-            pipeX[i] --; //move pipes closer
-          }
-        } else { //change highscore if necessary
-          if(player.score > player.highScore) player.highScore = player.score;
-        }
-      }
+function draw() {
+  background(150, 200, 255);
+  
+  //draw floor and ceiling
+  fill(50, 255, 100);
+  rect(0, 390, 400, 10);
+  rect(0, 0, 400, 10);
+  
+  //draw pipes
+  fill(0, 255, 0);
+  imageMode(CORNER);
+  for(let i = 0; i < pipe.length; i++){
+    rect(pipeX[i], (pipe[i] - 400) - PIPE_SPACE / 2, PIPE_WIDTH, 400); //top
+    image(PIPE, pipeX[i], (pipe[i] - 400) - PIPE_SPACE / 2, PIPE_WIDTH, 400);
+    image(PIPE_HEAD, pipeX[i] - 5, pipe[i] - PIPE_SPACE + 20, 60, 20);
+    
+    rect(pipeX[i], pipe[i] + PIPE_SPACE / 2, PIPE_WIDTH, 400); //bottom
+    image(PIPE, pipeX[i], pipe[i] + PIPE_SPACE / 2, PIPE_WIDTH, 400);
+    image(PIPE_HEAD, pipeX[i] - 5, pipe[i] + PIPE_SPACE - 40, 60, 20);
+  }
+  
+  //score
+  textSize(20);
+  fill(0);
+  text(player.score, 20, 30);
+  if(!player.alive) text('you died\nhigh score: ' + player.highScore, 20, 60); //checks if the player id dead
+  
+  //draw player
+  imageMode(CENTER);
+  fill(255, 255, 0);
+  image(BIRD, 100, player.y);
+  BIRD.resize(30, 20);
+  //circle(100, player.y, PLAYER_DIAMETER);
+  
+  //move player
+  player.y -= player.yVel;
+  player.yVel -= 0.2; //gravity
+  
+  //collisions
+  if(player.y > 385){ //floor
+    player.y = 385;
+    player.yVel = 0;
+  }
+  if(player.y < 15){ //ceiling
+    player.y = 15;
+    player.yVel = 0;
+  }
+  if(pipeX[0] == 70){ //change score
+    player.score++;
+  }
+  
+  //
+  if(pipeX[0] >= 100 - PIPE_WIDTH && pipeX[0] <= 100 && player.y >= pipe[0] + PIPE_SPACE / 2){
+    player.alive = false;
+  } //bottom pipe
+  
+  if(pipeX[0] >= 100 - PIPE_WIDTH && pipeX[0] <= 100 && player.y <= pipe[0] - PIPE_SPACE / 2){
+    player.alive = false;
+  } //top pipe
+  
+  //check if pipes need to be respawned
+  if(pipeX[0] < 0){
+    pipe.push(Math.floor(random() * 300) + 50); //set new pipe position
+    pipeX.push(400);
+    pipe.shift(); //remove old pipe
+    pipeX.shift();
+  }
+  if(player.alive){
+    for(let i = 0; i < pipeX.length; i++){ 
+      pipeX[i] --; //move pipes closer
+    }
+  } else { //change highscore if necessary
+    if(player.score > player.highScore){
+      player.highScore = player.score;
+      window.localStorage.setItem('highScore', player.score);
+    }
+  }
+}
     </script>
   </body>
 </html>
