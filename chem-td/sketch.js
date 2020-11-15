@@ -102,26 +102,24 @@ function shoot(x, y, damage, fireRate){
   
     //spawn thw shot
 }
-function colorCollision(){
+function colorCollision(r, g, b){
     //some magic that checks for placement collisions
     let data = ctx.getImageData(mouseX - 10, mouseY - 10, 20, 20).data;
-    console.log(data);
     for(let i = 0; i < data.length; i += 4){
         if(
-            data[i] == 0 &&
-            data[i + 1] == 0 &&
-            data[i + 2] == 0
+            data[i] != r ||
+            data[i + 1] != g ||
+            data[i + 2] != b
         ){
-            return true;
+            return false;
         }
     }
-    return false;
+    return true;
     
 }
 function defense (/**@type{number}*/def){ //creates defenses
-    let notColliding = colorCollision();
-    console.log(notColliding);
-    if(notColliding && money >= defenses[def].price){
+    let colliding = colorCollision(0, 0, 0);
+    if(colliding && money >= defenses[def].price){
         let d = {
             name: defenses[def].name,
             damage: defenses[def].damage,
