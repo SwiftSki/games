@@ -78,7 +78,7 @@ function draw() {
         towers[i].timer--;
     }
     //shots
-    for(let i = 0; i < shots.length; i++){
+    for(let i = shots.length - 1; i > 0; i--){
         //render
         fill(255, 0, 0);
         circle(shots[i].x, shots[i].y, 5);
@@ -86,6 +86,12 @@ function draw() {
         //move
         shots[i].x += shots[i].xv / 500;
         shots[i].y += shots[i].yv / 500;
+
+        //timer
+        if(shots[i].time == 0){
+            shots.splice(i, 1);
+        }
+        shots[i].time--;
     }
     
     //calls the enemy function 'render()'
@@ -104,6 +110,17 @@ function draw() {
         enemy[i].pos.y = 0;
         }
     }
+
+    //collisions
+    for(let i = shots.length - 1; i > 0; i--){
+        for(let j = enemy.length - 1; j > 0; j--){
+            if(checkDistance(shots[i].x, shots[i].y, enemy[j].pos.x, enemy[j].pos.y) < 20){
+                shots.splice(i, 1);
+                enemy.splice(j, 1);
+                console.log('collided');
+            }
+        }
+    }
 }
 
 function shoot(x, y, damage, fireRate){
@@ -111,9 +128,9 @@ function shoot(x, y, damage, fireRate){
     let best = Infinity;
     let bestEnemy = enemy[0];
     for(let j = 0; j < enemy.length; j++){
-        if(Math.sqrt(Math.abs(x - enemy[j].pos.x) ** 2 + Math.abs(y - enemy[j].pos.y) ** 2) < best){
+        if(checkDistance(x, y, enemy[j].pos.x, enemy[j].pos.y) < best){
             bestEnemy = enemy[j];
-            best = Math.sqrt(Math.abs(x - enemy[j].pos.x) ** 2 + Math.abs(y - enemy[j].pos.y) ** 2);
+            best = checkDistance(x, y, enemy[j].pos.x, enemy[j].pos.y);
         }
     }
   
@@ -122,7 +139,8 @@ function shoot(x, y, damage, fireRate){
         x: x,
         y: y,
         xv: Math.abs(x - bestEnemy.pos.x),
-        yv: Math.abs(y - bestEnemy.pos.y)
+        yv: Math.abs(- y - bestEnemy.pos.y),
+        time: 2000
     });
 }
 function colorCollision(/**@type{number}*/r, /**@type{number}*/g, /**@type{number}*/b){
@@ -139,6 +157,9 @@ function colorCollision(/**@type{number}*/r, /**@type{number}*/g, /**@type{numbe
     }
     return true;
     
+}
+function checkDistance(x1, y1, x2, y2){
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
 function defense (/**@type{number}*/def){ //creates defenses
     let colliding = colorCollision(0, 0, 0);

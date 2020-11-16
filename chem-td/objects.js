@@ -1,12 +1,3 @@
-const enemies = [
-    {
-      name: 'H',
-      p: 1,
-      decay: false,
-      decayTime: 0
-    }
-];
- 
 const defenses = [
   {
     name: 'basic',
