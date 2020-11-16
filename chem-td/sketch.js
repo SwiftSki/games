@@ -71,12 +71,21 @@ function draw() {
         pop();
         
         //shoot
-        shoot(towers[i].x, towers[i].y, towers[i].damage, towers[i].fireRate);
+        if(towers[i].timer == 0){
+            shoot(towers[i].x, towers[i].y, towers[i].damage, towers[i].fireRate);
+            towers[i].timer = towers[i].fireRate;
+        }
+        towers[i].timer--;
     }
-    //render shots
+    //shots
     for(let i = 0; i < shots.length; i++){
+        //render
         fill(255, 0, 0);
         circle(shots[i].x, shots[i].y, 5);
+
+        //move
+        shots[i].x += shots[i].xv / 500;
+        shots[i].y += shots[i].yv / 500;
     }
     
     //calls the enemy function 'render()'
@@ -99,10 +108,24 @@ function draw() {
 
 function shoot(x, y, damage, fireRate){
     //find nearest enemy
+    let best = Infinity;
+    let bestEnemy = enemy[0];
+    for(let j = 0; j < enemy.length; j++){
+        if(Math.sqrt(Math.abs(x - enemy[j].pos.x) ** 2 + Math.abs(y - enemy[j].pos.y) ** 2) < best){
+            bestEnemy = enemy[j];
+            best = Math.sqrt(Math.abs(x - enemy[j].pos.x) ** 2 + Math.abs(y - enemy[j].pos.y) ** 2);
+        }
+    }
   
-    //spawn thw shot
+    //spawn the shot
+    shots.push({
+        x: x,
+        y: y,
+        xv: Math.abs(x - bestEnemy.pos.x),
+        yv: Math.abs(y - bestEnemy.pos.y)
+    });
 }
-function colorCollision(r, g, b){
+function colorCollision(/**@type{number}*/r, /**@type{number}*/g, /**@type{number}*/b){
     //some magic that checks for placement collisions
     let data = ctx.getImageData(mouseX - 10, mouseY - 10, 20, 20).data;
     for(let i = 0; i < data.length; i += 4){
@@ -124,6 +147,7 @@ function defense (/**@type{number}*/def){ //creates defenses
             name: defenses[def].name,
             damage: defenses[def].damage,
             fireRate: defenses[def].fireRate,
+            timer: defenses[def].timer,
             x: mouseX,
             y: mouseY
         }

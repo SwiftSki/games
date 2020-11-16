@@ -14,7 +14,8 @@ const defenses = [
     damage: 1,
     x: 0,
     y: 0,
-    fireRate: 1
+    fireRate: 100, //frames between shots
+    timer: 100
   }
 ];
 
