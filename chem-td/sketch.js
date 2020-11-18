@@ -4,7 +4,10 @@ figure out how to get map vectors to correspond with enemy movements
 towers shoot
 */
 var canv, ctx;
-var enemy = [];
+var enemy = [],
+    wave = 0,
+    spawning = [],
+    spawnTimer = 20;
 var baseHealth = 10, 
     money = 100,
     towers = [],
@@ -57,6 +60,14 @@ function draw() {
     rect(100, 400, 50, 50);
     fill(0);
     text('1\nbasic\n$10', 110, 415);
+
+    //spawn enemies
+    if(spawning.length > 0 && (spawnTimer == 0 || enemy.length == 0)){
+        enemy.push(spawning[0]);
+        spawning.shift();
+        spawnTimer = 20;
+    }
+    spawnTimer--;
     
     //towers
     for(let i = 0; i < towers.length; i++){
@@ -112,14 +123,23 @@ function draw() {
     }
 
     //collisions
-    for(let i = shots.length - 1; i > 0; i--){
-        for(let j = enemy.length - 1; j > 0; j--){
+    for(let i = shots.length - 1; i >= 0; i--){
+        for(let j = enemy.length - 1; j >= 0; j--){
             if(checkDistance(shots[i].x, shots[i].y, enemy[j].pos.x, enemy[j].pos.y) < 20){
                 shots.splice(i, 1);
-                enemy.splice(j, 1);
-                console.log('collided');
+                enemy[j].p--;
+                money += p;
+                if(enemy[j].p == 0){
+                    enemy.splice(j, 1);
+                    console.log('collided');
+                }
             }
         }
+    }
+
+    //spawn new wave
+    if(enemy.length == 0 && spawning.length == 0){
+        newWave();
     }
 }
 
@@ -138,8 +158,8 @@ function shoot(x, y, damage, fireRate){
     shots.push({
         x: x,
         y: y,
-        xv: Math.abs(x - bestEnemy.pos.x),
-        yv: Math.abs(- y - bestEnemy.pos.y),
+        xv: -x + bestEnemy.pos.x,
+        yv: -y + bestEnemy.pos.y,
         time: 2000
     });
 }
@@ -161,6 +181,13 @@ function colorCollision(/**@type{number}*/r, /**@type{number}*/g, /**@type{numbe
 function checkDistance(x1, y1, x2, y2){
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
+
+function newWave(){
+    wave++;
+    for(let i = 0; i < wave * 3; i++){
+        spawning.push(new Enemy(Math.floor(Math.random() * wave + 1)));
+    }
+}
 function defense (/**@type{number}*/def){ //creates defenses
     let colliding = colorCollision(0, 0, 0);
     if(colliding && money >= defenses[def].price){
@@ -178,7 +205,7 @@ function defense (/**@type{number}*/def){ //creates defenses
 }
 
 class Enemy {
-    constructor(p) {
+    constructor(/**@type{number}*/p) {
         //this is the position of the enemy
         this.pos = createVector(0, 0);
         this.name = enemies[p - 1].name;
