@@ -3,6 +3,7 @@ TODO:
 figure out how to get map vectors to correspond with enemy movements
 towers shoot
 */
+"use strict";
 var canv, ctx;
 var enemy = [],
     wave = 0,
@@ -11,7 +12,8 @@ var enemy = [],
 var baseHealth = 10, 
     money = 100,
     towers = [],
-    shots = [];
+    shots = [],
+    gameOver = false;
 
 
 var cMap = maps[0]; //this will be random later
@@ -20,6 +22,9 @@ function keyTyped(){
     switch(key){
         case '1':
             defense(0);
+            break;
+        case '2':
+            defense(1);
             break;
     }
 }
@@ -33,6 +38,12 @@ function setup() {
 
 function draw() {
     background(0);
+    if(gameOver){
+        fill(255);
+        textSize(50);
+        text('Game Over', 100, 200);
+        return;
+    }
     
     //draw map
     push();
@@ -52,14 +63,18 @@ function draw() {
     rect(0, 400, 400, 50);
     //text
     fill(0);
-    textSize(15);
-    text(`lives: ${baseHealth}\nmoney: ${money}`, 5, 420);
+    textSize(12);
+    text(`lives: ${baseHealth}\nmoney: ${money}\nwave: ${wave}`, 5, 415);
     pop();
     //towers
     fill(0, 0, 255);
     rect(100, 400, 50, 50);
-    fill(0);
+    fill(255);
     text('1\nbasic\n$10', 110, 415);
+    fill(0, 255, 0);
+    rect(150, 400, 50, 50);
+    fill(255);
+    text('2\nrapid\n$50');
 
     //spawn enemies
     if(spawning.length > 0 && (spawnTimer == 0 || enemy.length == 0)){
@@ -77,6 +92,9 @@ function draw() {
         if(obj.name == 'basic'){
         fill(0, 0, 255);
         circle(obj.x, obj.y, 20);
+        } else if(obj.name == 'rapid'){
+            fill(0, 255, 0);
+            circle(obj.x, obj.y, 20);
         }
         
         pop();
@@ -123,15 +141,18 @@ function draw() {
     }
 
     //collisions
-    for(let i = shots.length - 1; i >= 0; i--){
+    for(let i = shots.length - 1; i > 0; i--){
         for(let j = enemy.length - 1; j >= 0; j--){
+            if(shots[i] == undefined || enemy[j] == undefined){
+                console.log(`this shot is broken\nshot: ${shots[i]}\ni: ${i}\n\nor it could be an enemy\nenemy: ${enemy[j]}\nj: ${j}`);
+                continue;
+            }
             if(checkDistance(shots[i].x, shots[i].y, enemy[j].pos.x, enemy[j].pos.y) < 20){
                 shots.splice(i, 1);
                 enemy[j].p--;
-                money += p;
+                money += enemy[j].p;
                 if(enemy[j].p == 0){
                     enemy.splice(j, 1);
-                    console.log('collided');
                 }
             }
         }
@@ -140,6 +161,10 @@ function draw() {
     //spawn new wave
     if(enemy.length == 0 && spawning.length == 0){
         newWave();
+    }
+
+    if(baseHealth <= 0){
+        gameOver = true;
     }
 }
 
@@ -203,9 +228,9 @@ function defense (/**@type{number}*/def){ //creates defenses
         money -= defenses[def].price;
     }
 }
-
+y
 class Enemy {
-    constructor(/**@type{number}*/p) {
+    constructor(/**@tpe{number}*/p) {
         //this is the position of the enemy
         this.pos = createVector(0, 0);
         this.name = enemies[p - 1].name;
@@ -225,7 +250,7 @@ class Enemy {
             translate(this.pos);
             //this is the enemy
             noStroke();
-            fill(0, 0, 255);
+            fill(0, 0 + this.p, 255 - this.p);
             circle(0, 0, 15);
             pop();
             //this section says what vector should be moving on, so for if its past the 1st section it does section2, if it is past section2 is does section3, if it is in neither of those sections it does section1

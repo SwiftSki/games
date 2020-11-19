@@ -7,6 +7,15 @@ const defenses = [
     y: 0,
     fireRate: 100, //frames between shots
     timer: 100
+  },
+  {
+    name: 'rapid',
+    price: 50,
+    damage: 1,
+    x: 0,
+    y: 0,
+    fireRate: 10,
+    timer: 10
   }
 ];
 
