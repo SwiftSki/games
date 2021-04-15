@@ -22,7 +22,7 @@ class bird { //this creates the player
     this.yVel = 0;
     this.score = 0;
     this.alive = true;
-    oldScore != undefined ? this.highScore = oldScore : this.highScore = window.localStorage.getItem('highScore');
+    oldScore != undefined ? this.highScore = oldScore : this.highScore = window.localStorage.getItem('swiftski-fb-highScore');
   }
 }
 
@@ -49,7 +49,7 @@ function setup() {
   createCanvas(400, 400); //creates the canvas for drawing
   noStroke(); //styling
   
-  if(window.localStorage.getItem('highScore') == undefined) window.localStorage.setItem('highScore', 0);
+  if(window.localStorage.getItem('swiftski-fb-highScore') == undefined) window.localStorage.setItem('swiftski-fb-highScore', 0);
   
   PIPE = loadImage('https://swiftski.github.io/games/flappy-bird/pipe.png');
   PIPE_HEAD = loadImage('https://swiftski.github.io/games/flappy-bird/pipe-head.png');
@@ -132,7 +132,7 @@ function draw() {
   } else { //change highscore if necessary
     if(player.score > player.highScore){
       player.highScore = player.score;
-      window.localStorage.setItem('highScore', player.score);
+      window.localStorage.setItem('swiftski-fb-highScore', player.score);
     }
   }
 }
